@@ -5,6 +5,8 @@ A fun alternative to intermittent compression devices
 
 Code for the footsie device and game, from [ForgeATL hackathon](http://www.forgeatl.com/hack) Aug 22-24, 2014.
 
+*Warning*: Here be dragons. This code is not the best it could be, but it worked and demoed.
+
 Here's a picture of the back:
 
 ![Back of the footsie device](https://pbs.twimg.com/media/BvzukLPIIAAUD37.jpg)
