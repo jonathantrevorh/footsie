@@ -2,6 +2,7 @@ import serial
 import Tkinter as tk
 import threading
 import traceback
+import random
 
 stopper = threading.Event()
 
@@ -27,7 +28,7 @@ def getLeftValue():
 def getRightValue():
     return poop['data']['right']
 def valueIsSufficient(value):
-    suffices = value > 500 # yay magic numbers!
+    suffices = value > 575 # yay magic numbers!
     return suffices
 
 reader = threading.Thread(target=readData, args=(1, '/dev/ttyACM0', 9600, poop, stopper))
@@ -69,13 +70,17 @@ class Footsie(tk.Tk):
                 print 'no is_active, so not updateUI'
                 return
             try:
-                self.frame.updateUI(params)
+                self.frame.updateUI()
             except Exception as e:
                 print e
                 traceback.print_exc()
 
             self.container.after(5, updateUI)
 
+        try:
+            self.frame.load(params)
+        except AttributeError:
+            pass
         try:
             if self.frame.updateUI:
                 updateUI()
@@ -110,9 +115,11 @@ class MeasurePage(tk.Frame):
         label.pack()
         self.continuebutton = tk.Button(self, text='Continue', command=lambda: controller.show_frame(PlayPage))
         self.continuebutton.pack_forget()
+
+    def load(self, params):
         self.state = {'left': False, 'right': False}
 
-    def updateUI(self, params):
+    def updateUI(self):
         # update internal state
         leftVal = getLeftValue()
         rightVal = getRightValue()
@@ -156,8 +163,65 @@ class PlayPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text='', font=TITLE_FONT)
         label.pack(side='top', fill='x', pady=10)
+        w = tk.Canvas(self, width=400, height=300)
+        w.pack()
+        self.w = w
         button = tk.Button(self, text='Go to the start page', command=lambda: controller.show_frame(StartPage))
         button.pack()
+        self.apples = self.generateApples(3)
+        self.drawScene()
+        self.drawPlayer(1)
+
+    def updateUI(self):
+        return
+
+    def drawScene(self):
+        # clear the background
+        self.drawBackground()
+        self.drawTree(100, 40)
+        self.drawTree(200, 40)
+        self.drawTree(300, 40)
+        for apple in self.apples:
+            self.drawApple(apple);
+
+    def drawBackground(self):
+        self.w.create_rectangle(0, 0, self.w.winfo_width(), self.w.winfo_height(), fill='blue')
+
+    def drawTree(self, x, y):
+        bloom_height = 60
+        bloom_width = 60
+        self.rect(x, y+100, 50, 200)
+        self.oval(x-40, y, bloom_width, bloom_height)
+        self.oval(x, y-15, bloom_width, bloom_height)
+        self.oval(x+30, y-10, bloom_width, bloom_height)
+        self.oval(x+20, y+20, bloom_width, bloom_height)
+        self.oval(x-20, y+25, bloom_width, bloom_height)
+
+    def rect(self, x, y, width, height, fill='brown'):
+        self.w.create_rectangle(x-width/2, y-height/2, x+width/2, y+height/2, fill=fill)
+
+    def oval(self, x, y, width, height, fill='green'):
+        self.w.create_oval(x-width/2, y-height/2, x+width/2, y+height/2, fill=fill)
+
+    def drawApple(self, apple):
+        apple_size = 20
+        self.rect(apple['x'], apple['y'] + apple_size / 2, apple_size / 5, apple_size * 3 / 4, fill='black')
+        self.oval(apple['x'] - apple_size / 5, apple['y'] * 4 / 3, apple_size, apple_size, fill='red')
+        self.oval(apple['x'] + apple_size / 5, apple['y'] * 4 / 3, apple_size, apple_size, fill='red')
+        return
+
+    def generateApple(self):
+        return {
+            'x': 100 + 100*random.randint(0, 2),
+            'y': random.randint(20, 80)
+        }
+
+    def generateApples(self, n):
+        return [self.generateApple() for i in range(0, n)]
+
+    def drawPlayer(self, n):
+        # use some polygons
+        return
 
     def unload(self):
         return
